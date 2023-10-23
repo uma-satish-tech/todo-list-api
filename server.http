@@ -13,16 +13,5 @@ GET http://localhost:3001/todos/?priority=HIGH&status=IN%20PROGRESS
 
 ###
 
-GET http://localhost:3001/todos/?search_q=HTML
+GET http://localhost:3001/todos/?search_q=Play
 
-###
-
-POST http://localhost:3001/todos/
-Content-Type: application/json
-
-{
-  "id":6,
-  "todo": "Finalize event theme",
-  "priority": "LOW",
-  "status": "TO DO"
-}

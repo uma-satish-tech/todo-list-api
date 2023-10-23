@@ -93,4 +93,88 @@ app.get("/todos/", async (request, response) => {
   response.send(data);
 });
 
+// get particular todo based on todoID
+
+app.get("/todos/:todoId/", async (request, response) => {
+  const { todoId } = request.params;
+  const getTodoItem = `
+    SELECT * FROM todo WHERE id = ${todoId};
+    `;
+  const item = await db.get(getTodoItem);
+  response.send(item);
+});
+
+// create todo item in todo table
+
+app.post("/todos/", async (request, response) => {
+  const todoDetails = request.body;
+  const { id, todo, priority, status } = todoDetails;
+  const addTodoQuery = `
+    INSERT INTO todo (id , todo , priority , status)
+    VALUES (
+        ${id},
+       '${todo}',
+       '${priority}',
+        '${status}'
+    );
+    `;
+  await db.run(addTodoQuery);
+  response.send("Todo Successfully Added");
+});
+
+// update todo item
+
+app.put("/todos/:todoId", async (request, response) => {
+  const { todoId } = request.params;
+  const reqBody = request.body;
+  let updateColumn = "";
+  switch (true) {
+    case reqBody.status !== undefined:
+      updateColumn = "Status";
+      break;
+    case reqBody.priority !== undefined:
+      updateColumn = "Priority";
+      break;
+    case reqBody.todo !== undefined:
+      updateColumn = "Todo";
+      break;
+  }
+
+  const previousTodoQuery = `
+  SELECT * FROM todo WHERE id = ${todoId};
+  `;
+
+  const previousTodo = await db.get(previousTodoQuery);
+  const {
+    todo = previousTodo.todo,
+    priority = previousTodo.priority,
+    status = previousTodo.status,
+  } = request.body;
+
+  const updateTodoQuery = `
+  UPDATE 
+  todo
+  SET 
+  todo = '${todo}',
+  priority = '${priority}',
+  status = '${status}'
+  WHERE 
+  id = ${todoId};
+  `;
+
+  await db.run(updateTodoQuery);
+  response.send(`${updateColumn} Updated`);
+});
+
+// delete specific todo based on id
+
+app.delete("/todos/:todoId/", async (request, response) => {
+  const { todoId } = request.params;
+  const deleteQuery = `
+   DELETE FROM todo WHERE id = ${todoId};
+   `;
+  await db.run(deleteQuery);
+  response.send("Todo Deleted");
+});
+
 module.exports = app;
